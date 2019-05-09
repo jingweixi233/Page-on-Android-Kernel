@@ -1,0 +1,131 @@
+#include <linux/module.h>
+#include <linux/kernel.h>
+#include <linux/init.h>
+#include <linux/sched.h>
+#include <linux/unistd.h>
+#include <linux/uaccess.h>
+#include <linux/mm.h>
+#include <linux/mm_types.h>
+#include <linux/slab.h>
+#include <asm/errno.h>
+#include <asm/pgtable.h>
+#define __NR_get_pagetable_layout 233
+#define __NR_expose_page_table 378
+MODULE_LICENSE("Dual BSD/GPL");
+
+struct pagetable_layout_info{
+    uint32_t pgdir_shift;
+    uint32_t pmd_shift;
+    uint32_t page_shift;
+};
+
+struct walk_copy{
+    unsigned long *fake_pgd_base;
+    unsigned long fake_pmd_base;
+
+}
+
+int copy_pmd_table(pmd_t *pmd, unsigned long addr, unsigned long next, struct mm_walk *walk){
+    unsigned long pgd_index = pgd_index(addr);
+    struct walk_copy *copy = (struct walk_copy*)walk->private;
+
+    int pfn, err;
+    struct vm_area_struct *current_vm = find_vma(current->mm, record->pte_base);
+
+    pfn = page_to_pfn(pmd_page((unsigned long)*pmd));
+
+    err = remap_pfn_range(current_vm, copy -> fake_pmd_base, pfn, PAGE_SIZE, vma->vm_page_prot);
+
+
+    copy -> fake_pgd_base[pgd_index] = copy -> fake_pmd_base;
+    //printk(KERN_INFO "pgd_base[%lu] = 0x%08lx\n", pmdIndex, record->pte_base);
+    copy -> fake_pmd_base += PAGE_SIZE;
+}
+
+
+
+
+
+int get_pagetable_layout(struct pagetable_layout_info __user * pgtbl_info, int size){
+    struct pagetable_layout_info layout;
+
+    layout.pgdir_shift = PGDIR_SHIFT;
+    layout.pmd_shift = PMD_SHIFT;
+    layout.page_shift = PAGE_SHIFT;
+
+    if(copy_to_user(pgtbl_info, &layout, sizeof(struct pagetable_layout_info))){
+        return -1;
+    }
+    return 0;
+}
+
+
+int expose_page_table(pid_t pid, unsigned long fake_pgd, unsigned long page_table_addr, unsigned long begin_vaddr, unsigned long end_vaddr){
+    struct pid *process_pid = NULL;
+    struct task_struct *target_process = NULL;
+    struct vm_area_struct *temp_vm;
+    struct walk_copy copy;
+    struct mm_work walk;
+
+    process_pid = find_get_pid(pid);
+
+    target_process = get_pid_task(process_pid, PIDTYPE_PID);
+
+    copy.fake_pgd_base = (unsigned long*)kmalloc(PGD_SIZE, GFP_KERNEL);
+    memset(copy.fake_pgd_base, 0, PGD_SIZE);
+    copy.fake_pmd_base = page_table_addr;
+
+    walk.pgd_entry = NULL;//for_pgd_entry;
+    walk.pud_entry = NULL;
+    walk.pmd_entry = copy_pmd_table;//NULL;
+    walk.pte_entry = NULL;
+    walk.pte_hole = NULL;
+    walk.hugetlb_entry = NULL;
+    walk.mm  = target_process->mm;
+    walk.private = (void*)(&copy);
+
+    down_write(&target_process->mm->mmap_sem);
+    walk_page_range(begin_vaddr, end_vaddr, &walk);
+    up_write(&target_process->mm->mmap_sem);
+
+    if (copy_to_user((void*)fake_pgd, record.pgd_base, PGD_SIZE)){
+        return -EFAULT;
+    }
+    
+    kfree(record.pgd_base);
+}
+
+
+
+static int pagetable_layout_init(void)
+{
+    long *syscall = (long*)0xc000d8c4;
+
+    // install get_pagetable_layout()
+    oldcall_NR_get_pagetable_layout = (int(*)(void))(syscall[__NR_get_pagetable_layout]); // preserve former system call
+    syscall[__NR_get_pagetable_layout] = (unsigned long)get_pagetable_layout; // assign new system call
+    printk(KERN_INFO "Module Get_pagetable_layout loaded successfully!\n");
+
+    // install expose_page_table()
+    oldcall_NR_expose_page_table = (int(*)(void))(syscall[__NR_expose_page_table]); // preserve former system call
+    syscall[__NR_expose_page_table] = (unsigned long)expose_page_table; // assign new system call
+    printk(KERN_INFO "Module Expose_page_table loaded successfully!\n");
+
+    return 0;
+}
+
+static void pagetable_layout_exit(void)
+{
+    long *syscall = (long*)0xc000d8c4;
+
+    // uninstall get_pagetable_layout()
+    syscall[__NR_get_pagetable_layout] = (unsigned long)oldcall_NR_get_pagetable_layout; // restore old system call
+    printk(KERN_INFO "Module Get_pagetable_layout removed successfully!\n");
+
+    // uninstall expose_page_table()
+    syscall[__NR_expose_page_table] = (unsigned long)oldcall_NR_expose_page_table; // restore old system call
+    printk(KERN_INFO "Module Expose_page_table removed successfully!\n");
+}
+
+module_init(pagetable_layout_init);
+module_exit(pagetable_layout_exit);
