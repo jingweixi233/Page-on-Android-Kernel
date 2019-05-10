@@ -1,0 +1,1 @@
+cmd_/home/jingweixi/Documents/os2/problem2/pagecopy.ko := arm-linux-androideabi-ld -r  -T /usr/lib/oskernel/kernel/goldfish/scripts/module-common.lds --build-id  -o /home/jingweixi/Documents/os2/problem2/pagecopy.ko /home/jingweixi/Documents/os2/problem2/pagecopy.o /home/jingweixi/Documents/os2/problem2/pagecopy.mod.o

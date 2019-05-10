@@ -1,0 +1,1 @@
+cmd_/home/jingweixi/Documents/os2/reference/pagetable/pagetable.ko := arm-linux-androideabi-ld -r  -T /usr/lib/oskernel/kernel/goldfish/scripts/module-common.lds --build-id  -o /home/jingweixi/Documents/os2/reference/pagetable/pagetable.ko /home/jingweixi/Documents/os2/reference/pagetable/pagetable.o /home/jingweixi/Documents/os2/reference/pagetable/pagetable.mod.o
