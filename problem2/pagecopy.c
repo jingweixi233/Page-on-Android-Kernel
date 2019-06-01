@@ -16,6 +16,8 @@ MODULE_LICENSE("Dual BSD/GPL");
 #define PGD_SIZE ((1 << 11) * sizeof(unsigned long))
 #define EACH_PTE_SIZE ((1 << 9) * sizeof(unsigned long))
 
+
+
 struct pagetable_layout_info{
     uint32_t pgdir_shift;
     uint32_t pmd_shift;
@@ -83,12 +85,14 @@ int get_pagetable_layout(struct pagetable_layout_info __user * pgtbl_info, int s
 int expose_page_table(pid_t pid, unsigned long fake_pgd, unsigned long page_table_addr, unsigned long begin_vaddr, unsigned long end_vaddr){
     struct pid *process_pid = NULL;
     struct task_struct *target_process = NULL;
-    //struct vm_area_struct *temp_vm;
+    struct vm_area_struct *tmp;
     struct walk_copy copy;
     struct mm_walk walk = {};
     int pgd_size;
     int err;
 
+    extern int walk_page_range(unsigned long addr, unsigned long end,
+		struct mm_walk *walk);
     printk(KERN_INFO "expose_page_table\n");
     printk(KERN_INFO "***************************************************\n");
     //calculate the pgd size
@@ -118,11 +122,11 @@ int expose_page_table(pid_t pid, unsigned long fake_pgd, unsigned long page_tabl
     walk.pte_entry = NULL;
     walk.pte_hole = NULL;
     walk.hugetlb_entry = NULL;
-    walk.mm  = target_process->mm;
+    walk.mm = target_process -> mm;
     walk.private = (void*)(&copy);
 
     down_write(&target_process->mm->mmap_sem);
-    //err = walk_page_range(begin_vaddr, end_vaddr, &walk);
+    walk_page_range(begin_vaddr, end_vaddr, &walk);
     up_write(&target_process->mm->mmap_sem);
 
     if (copy_to_user((void*)fake_pgd, copy.fake_pgd_base, pgd_size)){
