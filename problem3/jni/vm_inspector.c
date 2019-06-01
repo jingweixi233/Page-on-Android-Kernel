@@ -15,9 +15,11 @@ struct pagetable_layout_info{
 
 
 int main(int argc, char *argv[]){
-	unsigned long va;
+	unsigned long begin_va;
+    unsigned long end_va;
 	pid_t pid;
 	int err = 0;
+
 	unsigned long *fake_pgd_addr;
 	unsigned long *fake_pmd_addr;
 	unsigned long page_size;
@@ -32,19 +34,19 @@ int main(int argc, char *argv[]){
 	unsigned long page_frame;
 	unsigned long physical_address;
 
-	struct pagetable_layout_info ptb_info;
+    unsigned long begin_va_num;
+    unsigned long end_va_num;
 
+	struct pagetable_layout_info ptb_info;
 
 	//page_table_layout_info
 
 	pid=atoi(argv[1]);
-	va=strtoul(argv[2],NULL,16);
+	begin_va=strtoul(argv[2],NULL, 16);
+    end_va = strtoul(argv[3], NULL, 16);
+    
 
 	err=syscall(__NR_get_pagetable_layout, &ptb_info, sizeof(struct pagetable_layout_info));
-
-	printf("pgdir_shift:%d \n",ptb_info.pgdir_shift);
-	printf("pmd_shift:%d \n",ptb_info.pmd_shift);
-	printf("page_shift:%d \n",ptb_info.page_shift);
 
 
 	//expose_page_table
@@ -53,17 +55,10 @@ int main(int argc, char *argv[]){
 	pgd_size = 1<<(32 - ptb_info.pgdir_shift) *  sizeof(unsigned long);
 	pmd_space_size = pgd_size * (1 << 9);
 
-	printf("pagesize = %d\n", page_size);
-	printf("pgdsize = %d\n", pgd_size);
-	
-
 	fake_pmd_addr = mmap(NULL, pmd_space_size, PROT_READ | PROT_WRITE, MAP_SHARED | MAP_ANONYMOUS, -1, 0);
 	fake_pgd_addr = malloc(pgd_size);
 
-	printf("fake_pmd_addr = %p\n", fake_pmd_vaddr);
-	printf("fake_pgd_addr = %p\n", fake_pgd_addr);
-
-	err = syscall(__NR_expose_page_table, pid, fake_pgd_addr, fake_pmd_addr, va, va+1);
+	err = syscall(__NR_expose_page_table, pid, fake_pgd_addr, fake_pmd_addr, begin_va, end_va);
 	
 	if(err != 0){
 		return -1;
@@ -71,20 +66,25 @@ int main(int argc, char *argv[]){
 
 	//calculate the physical address;
 
-	pgd_index = (va >> 21) & 0x7FF;
-	pmd_index = (va >> ptb_info.page_shift) & 0x1FF;
-	offset = va & 0xFFF;
+    begin_va_num = begin_va >> (ptb_info.page_shift);
+    end_va_num = end_va >> (ptb_info.page_shift);
 
-	pmd_base = (unsigned long*)((unsigned long*)fake_pgd)[pgd_index];
-	page_frame = pmd_base[pmd_index] & 0xFFFFF000;
-	physical_address = page_frame + offset;
+    printf("vm_inspector\n")
+    printf("Page number\t\t\tFrame number\n");
 
-    printf("VATranslate\n");
-    printf("virtual address = 0x%08lx\n", va);
-    printf("pgd_index = 0x%03lx\n", pgd_index);
-	printf("pmd_index = 0x%03lx\n", pmd_index);
-	printf("offset = 0x%03lx\n", offset);
-	printf("physical address = 0x%08lx\n", physical_address);
+    for(va_num = begin_va_num; va_num < end_va_num; va++){
+
+        pgd_index = (va >> 9) & 0x7FF;
+        pmd_index = va & 0x1FF;
+
+        pmd_base = (unsigned long*)((unsigned long*)fake_pgd)[pgd_index];
+        if(pmd_base){
+            page_frame = (pmd_base[pmd_index] & 0xFFFFF000 ) >> (ptb_info.page_shift);
+            if(page_frame){
+                printf("0x%08lx\t\t\t0x%08lx\n", va_num, page_frame);
+            }
+        }
+    }
 
 	free(fake_pgd_addr);
 	munmap(fake_pmd_addr, pmd_space_size);
