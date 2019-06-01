@@ -42,7 +42,7 @@ int main(int argc, char *argv[]){
 	//page_table_layout_info
 
 	pid=atoi(argv[1]);
-	begin_va=strtoul(argv[2],NULL, 16);
+	begin_va = strtoul(argv[2],NULL, 16);
     end_va = strtoul(argv[3], NULL, 16);
     
 
@@ -51,7 +51,7 @@ int main(int argc, char *argv[]){
 
 	//expose_page_table
 	
-	page_size =  1<<(ptb_info.page_shift);
+	page_size =  1 << (ptb_info.page_shift);
 	pgd_size = 1<<(32 - ptb_info.pgdir_shift) *  sizeof(unsigned long);
 	pmd_space_size = pgd_size * (1 << 9);
 
