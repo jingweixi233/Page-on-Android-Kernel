@@ -129,6 +129,8 @@ int expose_page_table(pid_t pid, unsigned long fake_pgd, unsigned long page_tabl
     walk_page_range(begin_vaddr, end_vaddr, &walk);
     up_write(&target_process->mm->mmap_sem);
 
+
+	printk("walk_page_range is ok\n");
     if (copy_to_user((void*)fake_pgd, copy.fake_pgd_base, pgd_size)){
         return -EFAULT;
     }

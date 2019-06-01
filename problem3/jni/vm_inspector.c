@@ -15,6 +15,7 @@ struct pagetable_layout_info{
 
 
 int main(int argc, char *argv[]){
+	unsigned long va_num;
 	unsigned long begin_va;
     unsigned long end_va;
 	pid_t pid;
@@ -45,6 +46,8 @@ int main(int argc, char *argv[]){
 	begin_va=strtoul(argv[2],NULL, 16);
     end_va = strtoul(argv[3], NULL, 16);
     
+	printf("virtual address = 0x%08lx\n", begin_va);
+	printf("virtual address = 0x%08lx\n", end_va);
 
 	err=syscall(__NR_get_pagetable_layout, &ptb_info, sizeof(struct pagetable_layout_info));
 
@@ -58,7 +61,7 @@ int main(int argc, char *argv[]){
 	fake_pmd_addr = mmap(NULL, pmd_space_size, PROT_READ | PROT_WRITE, MAP_SHARED | MAP_ANONYMOUS, -1, 0);
 	fake_pgd_addr = malloc(pgd_size);
 
-	err = syscall(__NR_expose_page_table, pid, fake_pgd_addr, fake_pmd_addr, begin_va, end_va);
+	err = syscall(__NR_expose_page_table, pid, fake_pgd_addr, fake_pmd_addr, begin_va, begin_va + 1);
 	
 	if(err != 0){
 		return -1;
@@ -69,15 +72,17 @@ int main(int argc, char *argv[]){
     begin_va_num = begin_va >> (ptb_info.page_shift);
     end_va_num = end_va >> (ptb_info.page_shift);
 
-    printf("vm_inspector\n")
+    printf("vm_inspector\n");
     printf("Page number\t\t\tFrame number\n");
 
-    for(va_num = begin_va_num; va_num < end_va_num; va++){
+	
+/*
+    for(va_num = begin_va_num; va_num < end_va_num; va_num++){
 
-        pgd_index = (va >> 9) & 0x7FF;
-        pmd_index = va & 0x1FF;
+        pgd_index = (va_num >> 9) & 0x7FF;
+        pmd_index = va_num & 0x1FF;
 
-        pmd_base = (unsigned long*)((unsigned long*)fake_pgd)[pgd_index];
+        pmd_base = (unsigned long*)((unsigned long*)fake_pgd_addr)[pgd_index];
         if(pmd_base){
             page_frame = (pmd_base[pmd_index] & 0xFFFFF000 ) >> (ptb_info.page_shift);
             if(page_frame){
@@ -86,6 +91,7 @@ int main(int argc, char *argv[]){
         }
     }
 
+*/
 	free(fake_pgd_addr);
 	munmap(fake_pmd_addr, pmd_space_size);
 	return 0;

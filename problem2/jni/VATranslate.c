@@ -39,6 +39,8 @@ int main(int argc, char *argv[]){
 
 	pid=atoi(argv[1]);
 	va=strtoul(argv[2],NULL,16);
+
+
 	printf("virtual address = 0x%08lx\n", va);
 	err=syscall(__NR_get_pagetable_layout, &ptb_info, sizeof(struct pagetable_layout_info));
 
@@ -53,8 +55,8 @@ int main(int argc, char *argv[]){
 	pgd_size = (1<<(32-ptb_info.pgdir_shift))*sizeof(unsigned long);
 	pmd_space_size = pgd_size * (1 << 9);
 
-	printf("pagesize = %d\n", page_size);
-	printf("pgdsize = %d\n", pgd_size);
+	printf("pagesize = %ld\n", page_size);
+	printf("pgdsize = %ld\n", pgd_size);
 	
 
 	fake_pmd_addr = mmap(NULL, pmd_space_size, PROT_READ | PROT_WRITE, MAP_SHARED | MAP_ANONYMOUS, -1, 0);
