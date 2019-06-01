@@ -45,21 +45,34 @@ int main(int argc, char *argv[]){
 	pid=atoi(argv[1]);
 	begin_va = strtoul(argv[2],NULL, 16);
     end_va = strtoul(argv[3], NULL, 16);
-    
-	printf("virtual address = 0x%08lx\n", begin_va);
-	printf("virtual address = 0x%08lx\n", end_va);
+    printf("*******************************************************\n");
+	//printf("virtual address = 0x%08lx\n", begin_va);
+	//printf("virtual address = 0x%08lx\n", end_va);
 
 	err=syscall(__NR_get_pagetable_layout, &ptb_info, sizeof(struct pagetable_layout_info));
 
-
+	
+	printf("pgdir_shift:%d \n",ptb_info.pgdir_shift);
+	printf("pmd_shift:%d \n",ptb_info.pmd_shift);
+	printf("page_shift:%d \n",ptb_info.page_shift);
 	//expose_page_table
 	
 	page_size =  1 << (ptb_info.page_shift);
-	pgd_size = 1<<(32 - ptb_info.pgdir_shift) *  sizeof(unsigned long);
+	pgd_size = (1<<(32 - ptb_info.pgdir_shift)) *  sizeof(unsigned long);
 	pmd_space_size = pgd_size * (1 << 9);
 
+	//printf("pmd_space_size = %ld\n", pmd_space_size);
+
 	fake_pmd_addr = mmap(NULL, pmd_space_size, PROT_READ | PROT_WRITE, MAP_SHARED | MAP_ANONYMOUS, -1, 0);
+	if(!fake_pmd_addr){
+		printf("fake pmd creat wrong\n");
+		return -1;
+
+	}
+	//printf("fake_pmd_addr %lx\n", fake_pmd_addr);
 	fake_pgd_addr = malloc(pgd_size);
+	//printf("fake_pgd_addr %lx\n", fake_pgd_addr);
+	
 
 	err = syscall(__NR_expose_page_table, pid, fake_pgd_addr, fake_pmd_addr, begin_va, begin_va + 1);
 	
@@ -76,7 +89,7 @@ int main(int argc, char *argv[]){
     printf("Page number\t\t\tFrame number\n");
 
 	
-/*
+
     for(va_num = begin_va_num; va_num < end_va_num; va_num++){
 
         pgd_index = (va_num >> 9) & 0x7FF;
@@ -91,7 +104,7 @@ int main(int argc, char *argv[]){
         }
     }
 
-*/
+printf("*******************************************************\n");
 	free(fake_pgd_addr);
 	munmap(fake_pmd_addr, pmd_space_size);
 	return 0;

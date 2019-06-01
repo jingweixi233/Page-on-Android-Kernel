@@ -72,7 +72,7 @@ int copy_pmd_table(pmd_t *pmd, unsigned long addr, unsigned long next, struct mm
 
     copy -> fake_pgd_base[pgd_index] = copy -> fake_pmd_base;
     printk("Function in copy_pmd_table\n");
-    printk(KERN_INFO "pgd_base[%lu] = 0x%08lx\n", pgd_Index, copy -> fake_pmd_base);
+    printk(KERN_INFO "fake_pgd_base[%lu] = 0x%08lx\n", pgd_index, copy -> fake_pmd_base);
     copy -> fake_pmd_base += pte_size;
 	return 0;
 }
@@ -113,7 +113,7 @@ int expose_page_table(pid_t pid, unsigned long fake_pgd, unsigned long page_tabl
     struct walk_copy copy;
     struct mm_walk walk = {};
     int pgd_size;
-    int err;
+    //int err;
 
     extern int walk_page_range(unsigned long addr, unsigned long end,
 		struct mm_walk *walk);
@@ -124,7 +124,7 @@ int expose_page_table(pid_t pid, unsigned long fake_pgd, unsigned long page_tabl
     
     process_pid = find_get_pid(pid);
 
-    if (!pid_struct) {
+    if (!process_pid) {
         printk(KERN_INFO "pid is wrong\n");
         return -EINVAL;
     }

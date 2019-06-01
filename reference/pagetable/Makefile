@@ -1,5 +1,5 @@
 obj-m := pagetable.o
-KID := ~/Documents/os2/reference/kernel/goldfish
+KID := /usr/lib/oskernel/kernel/goldfish
 CROSS_COMPILE=arm-linux-androideabi-
 CC=$(CROSS_COMPILE)gcc
 LD=$(CROSS_COMPILE)ld
