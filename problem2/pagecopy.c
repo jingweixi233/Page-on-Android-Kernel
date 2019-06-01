@@ -42,13 +42,37 @@ int copy_pmd_table(pmd_t *pmd, unsigned long addr, unsigned long next, struct mm
 
     pte_size = (1 << 9) * sizeof(unsigned long);
 
+    if (!current_vm)
+    {
+        printk(KERN_INFO "vma empty!\n");
+        return -EFAULT;
+    }
+
+    if (!pmd)
+    {
+        printk(KERN_INFO "pmd empty!\n");
+        return 0;
+    }
+
     pfn = page_to_pfn(pmd_page((unsigned long)*pmd));
+
+    if (!pfn_valid(pfn))
+    {
+        printk(KERN_INFO "pfn invalid!\n");
+        return -EFAULT;
+    }
 
     err = remap_pfn_range(current_vm, copy -> fake_pmd_base, pfn, PAGE_SIZE, current_vm -> vm_page_prot);
 
+    if (err)
+    {
+        printk(KERN_INFO "remap_pfn_range failed!\n");
+        return err;
+    }
 
     copy -> fake_pgd_base[pgd_index] = copy -> fake_pmd_base;
-    //printk(KERN_INFO "pgd_base[%lu] = 0x%08lx\n", pmdIndex, record->pte_base);
+    printk("Function in copy_pmd_table\n");
+    printk(KERN_INFO "pgd_base[%lu] = 0x%08lx\n", pgd_Index, copy -> fake_pmd_base);
     copy -> fake_pmd_base += pte_size;
 	return 0;
 }
@@ -75,7 +99,7 @@ int get_pagetable_layout(struct pagetable_layout_info __user * pgtbl_info, int s
         return -1;
 	}
 	if(copy_to_user(pgtbl_info, &layout, sizeof(struct pagetable_layout_info))){
-		return -1;
+		return -EFAULT;
 	}
 	printk(KERN_INFO "***************************************************\n");
 	return 0;
@@ -100,6 +124,11 @@ int expose_page_table(pid_t pid, unsigned long fake_pgd, unsigned long page_tabl
     
     process_pid = find_get_pid(pid);
 
+    if (!pid_struct) {
+        printk(KERN_INFO "pid is wrong\n");
+        return -EINVAL;
+    }
+        
     target_process = get_pid_task(process_pid, PIDTYPE_PID);
     // print target process name
     printk(KERN_INFO "process name = %s.\n", target_process->comm); 
@@ -107,16 +136,23 @@ int expose_page_table(pid_t pid, unsigned long fake_pgd, unsigned long page_tabl
     // travel the virtual memory areas
     down_write(&target_process->mm->mmap_sem);
     printk(KERN_INFO "Virtual memory of the target process:\n");
-    for (tmp = target_process->mm->mmap; tmp; tmp = tmp->vm_next)
+    for (tmp = target_process->mm->mmap; tmp; tmp = tmp->vm_next){
         printk(KERN_INFO "0x%08lx - 0x%08lx\n", tmp->vm_start, tmp->vm_end);
+    }
     up_write(&target_process->mm->mmap_sem);
 
 
     copy.fake_pgd_base = (unsigned long*)kmalloc(pgd_size, GFP_KERNEL);
+    if (!copy.fake_pgd_base){
+        return -EFAULT;
+    }
     memset(copy.fake_pgd_base, 0, pgd_size);
     copy.fake_pmd_base = page_table_addr;
-
-    walk.pgd_entry = NULL;//for_pgd_entry;
+    if (!copy.fake_pmd_base){
+        return -EFAULT;
+    }
+    walk.pgd_entry 
+    = NULL;//for_pgd_entry;
     walk.pud_entry = NULL;
     walk.pmd_entry = copy_pmd_table;//NULL;
     walk.pte_entry = NULL;
