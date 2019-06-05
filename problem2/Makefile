@@ -1,5 +1,5 @@
 obj-m := pagecopy.o
-KID := /usr/lib/oskernel/kernel/goldfish
+KID := ~/Documents/os2/kernel/goldfish
 CROSS_COMPILE=arm-linux-androideabi-
 CC=$(CROSS_COMPILE)gcc
 LD=$(CROSS_COMPILE)ld
