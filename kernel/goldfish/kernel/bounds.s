@@ -14,7 +14,7 @@
 @	compiled by GNU C version 4.8, GMP version 5.0.5, MPFR version 3.1.1, MPC version 1.0.1
 @ GGC heuristics: --param ggc-min-expand=100 --param ggc-min-heapsize=131072
 @ options passed:  -nostdinc
-@ -I /usr/lib/oskernel/kernel/goldfish/arch/arm/include
+@ -I /home/jingweixi/Documents/os2/kernel/goldfish/arch/arm/include
 @ -I arch/arm/include/generated -I include
 @ -I arch/arm/mach-goldfish/include -imultilib armv7-a
 @ -iprefix /usr/lib/ndk/android-ndk-linux/toolchains/arm-linux-androideabi-4.9/prebuilt/linux-x86_64/bin/../lib/gcc/arm-linux-androideabi/4.9/
@@ -22,7 +22,7 @@
 @ -D KBUILD_BASENAME=KBUILD_STR(bounds)
 @ -D KBUILD_MODNAME=KBUILD_STR(bounds)
 @ -isystem /usr/lib/ndk/android-ndk-linux/toolchains/arm-linux-androideabi-4.9/prebuilt/linux-x86_64/bin/../lib/gcc/arm-linux-androideabi/4.9/include
-@ -include /usr/lib/oskernel/kernel/goldfish/include/linux/kconfig.h
+@ -include /home/jingweixi/Documents/os2/kernel/goldfish/include/linux/kconfig.h
 @ -MD kernel/.bounds.s.d kernel/bounds.c -mbionic -mlittle-endian -marm
 @ -mabi=aapcs-linux -mno-thumb-interwork -march=armv7-a -mfloat-abi=soft
 @ -mfpu=vfp -mtls-dialect=gnu -auxbase-strip kernel/bounds.s -g -Os -Wall
@@ -459,12 +459,14 @@ foo:
 	.ascii	"PCG_MIGRATION\000"
 .LASF26:
 	.ascii	"PG_head\000"
+.LASF30:
+	.ascii	"PG_reclaim\000"
 .LASF22:
 	.ascii	"PG_reserved\000"
 .LASF42:
 	.ascii	"ZONE_NORMAL\000"
-.LASF52:
-	.ascii	"/usr/lib/oskernel/kernel/goldfish\000"
+.LASF29:
+	.ascii	"PG_mappedtodisk\000"
 .LASF12:
 	.ascii	"PG_locked\000"
 .LASF16:
@@ -520,8 +522,6 @@ foo:
 	.ascii	"PG_error\000"
 .LASF6:
 	.ascii	"long long unsigned int\000"
-.LASF29:
-	.ascii	"PG_mappedtodisk\000"
 .LASF37:
 	.ascii	"PG_pinned\000"
 .LASF19:
@@ -560,8 +560,8 @@ foo:
 	.ascii	"__NR_PCG_FLAGS\000"
 .LASF0:
 	.ascii	"signed char\000"
-.LASF30:
-	.ascii	"PG_reclaim\000"
+.LASF52:
+	.ascii	"/home/jingweixi/Documents/os2/kernel/goldfish\000"
 .LASF11:
 	.ascii	"_Bool\000"
 .LASF33:

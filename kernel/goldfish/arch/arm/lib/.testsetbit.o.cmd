@@ -1,9 +1,9 @@
-cmd_arch/arm/lib/testsetbit.o := arm-linux-androideabi-gcc -Wp,-MD,arch/arm/lib/.testsetbit.o.d  -nostdinc -isystem /usr/lib/ndk/android-ndk-linux/toolchains/arm-linux-androideabi-4.9/prebuilt/linux-x86_64/bin/../lib/gcc/arm-linux-androideabi/4.9/include -I/usr/lib/oskernel/kernel/goldfish/arch/arm/include -Iarch/arm/include/generated -Iinclude  -include /usr/lib/oskernel/kernel/goldfish/include/linux/kconfig.h -D__KERNEL__ -mlittle-endian -Iarch/arm/mach-goldfish/include -D__ASSEMBLY__ -mabi=aapcs-linux -mno-thumb-interwork -funwind-tables  -D__LINUX_ARM_ARCH__=7 -march=armv7-a  -include asm/unified.h -msoft-float -gdwarf-2        -c -o arch/arm/lib/testsetbit.o arch/arm/lib/testsetbit.S
+cmd_arch/arm/lib/testsetbit.o := arm-linux-androideabi-gcc -Wp,-MD,arch/arm/lib/.testsetbit.o.d  -nostdinc -isystem /usr/lib/ndk/android-ndk-linux/toolchains/arm-linux-androideabi-4.9/prebuilt/linux-x86_64/bin/../lib/gcc/arm-linux-androideabi/4.9/include -I/home/jingweixi/Documents/os2/kernel/goldfish/arch/arm/include -Iarch/arm/include/generated -Iinclude  -include /home/jingweixi/Documents/os2/kernel/goldfish/include/linux/kconfig.h -D__KERNEL__ -mlittle-endian -Iarch/arm/mach-goldfish/include -D__ASSEMBLY__ -mabi=aapcs-linux -mno-thumb-interwork -funwind-tables  -D__LINUX_ARM_ARCH__=7 -march=armv7-a  -include asm/unified.h -msoft-float -gdwarf-2        -c -o arch/arm/lib/testsetbit.o arch/arm/lib/testsetbit.S
 
 source_arch/arm/lib/testsetbit.o := arch/arm/lib/testsetbit.S
 
 deps_arch/arm/lib/testsetbit.o := \
-  /usr/lib/oskernel/kernel/goldfish/arch/arm/include/asm/unified.h \
+  /home/jingweixi/Documents/os2/kernel/goldfish/arch/arm/include/asm/unified.h \
     $(wildcard include/config/arm/asm/unified.h) \
     $(wildcard include/config/thumb2/kernel.h) \
   include/linux/linkage.h \
@@ -13,20 +13,20 @@ deps_arch/arm/lib/testsetbit.o := \
     $(wildcard include/config/profile/all/branches.h) \
     $(wildcard include/config/enable/must/check.h) \
     $(wildcard include/config/enable/warn/deprecated.h) \
-  /usr/lib/oskernel/kernel/goldfish/arch/arm/include/asm/linkage.h \
-  /usr/lib/oskernel/kernel/goldfish/arch/arm/include/asm/assembler.h \
+  /home/jingweixi/Documents/os2/kernel/goldfish/arch/arm/include/asm/linkage.h \
+  /home/jingweixi/Documents/os2/kernel/goldfish/arch/arm/include/asm/assembler.h \
     $(wildcard include/config/cpu/feroceon.h) \
     $(wildcard include/config/trace/irqflags.h) \
     $(wildcard include/config/smp.h) \
     $(wildcard include/config/cpu/use/domains.h) \
-  /usr/lib/oskernel/kernel/goldfish/arch/arm/include/asm/ptrace.h \
+  /home/jingweixi/Documents/os2/kernel/goldfish/arch/arm/include/asm/ptrace.h \
     $(wildcard include/config/cpu/endian/be8.h) \
     $(wildcard include/config/arm/thumb.h) \
-  /usr/lib/oskernel/kernel/goldfish/arch/arm/include/asm/hwcap.h \
-  /usr/lib/oskernel/kernel/goldfish/arch/arm/include/asm/domain.h \
+  /home/jingweixi/Documents/os2/kernel/goldfish/arch/arm/include/asm/hwcap.h \
+  /home/jingweixi/Documents/os2/kernel/goldfish/arch/arm/include/asm/domain.h \
     $(wildcard include/config/io/36.h) \
   arch/arm/lib/bitops.h \
-  /usr/lib/oskernel/kernel/goldfish/arch/arm/include/asm/unwind.h \
+  /home/jingweixi/Documents/os2/kernel/goldfish/arch/arm/include/asm/unwind.h \
     $(wildcard include/config/arm/unwind.h) \
 
 arch/arm/lib/testsetbit.o: $(deps_arch/arm/lib/testsetbit.o)
