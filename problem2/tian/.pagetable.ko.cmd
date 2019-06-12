@@ -1,0 +1,1 @@
+cmd_/home/jingweixi/Documents/os2/problem2/tian/pagetable.ko := arm-linux-androideabi-ld -r  -T /home/jingweixi/Documents/os2/kernel/goldfish/scripts/module-common.lds --build-id  -o /home/jingweixi/Documents/os2/problem2/tian/pagetable.ko /home/jingweixi/Documents/os2/problem2/tian/pagetable.o /home/jingweixi/Documents/os2/problem2/tian/pagetable.mod.o

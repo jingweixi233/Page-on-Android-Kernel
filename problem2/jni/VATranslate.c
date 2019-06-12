@@ -4,8 +4,8 @@
 #include <errno.h>
 #include <sys/types.h>
 #include <sys/mman.h>
-#define __NR_get_pagetable_layout 233
-#define __NR_expose_page_table 378
+#define __NR_get_pagetable_layout 378
+#define __NR_expose_page_table 356
 
 struct pagetable_layout_info{
     uint32_t pgdir_shift;

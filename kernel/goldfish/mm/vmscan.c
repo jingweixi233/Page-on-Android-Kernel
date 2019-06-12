@@ -73,7 +73,7 @@ typedef unsigned __bitwise__ reclaim_mode_t;
 #define RECLAIM_MODE_LUMPYRECLAIM	((__force reclaim_mode_t)0x08u)
 #define RECLAIM_MODE_COMPACTION		((__force reclaim_mode_t)0x10u)
 
-#define PG_THRESHOLD 512
+#define PG_THRESHOLD 2
 
 struct scan_control {
 	/* Incremented by the number of inactive pages that were scanned */
@@ -755,8 +755,8 @@ static enum page_references page_check_references(struct page *page,
 
 	referenced_ptes = page_referenced(page, 1, mz->mem_cgroup, &vm_flags);
 	referenced_page = TestClearPageReferenced(page);
-	unsigned long PG_ref_now =  page -> PG_referenced;
-	page -> PG_referenced = page -> PG_referenced >> 1;
+	
+	
 
 	/* Lumpy reclaim - ignore references */
 	if (sc->reclaim_mode & RECLAIM_MODE_LUMPYRECLAIM)
@@ -770,6 +770,9 @@ static enum page_references page_check_references(struct page *page,
 		return PAGEREF_RECLAIM;
 
 	if (referenced_ptes) {
+		printk(KERN_INFO "%ld page referenced in inactive lru, PG_referenced = %ld.\n",page -> index ,page->PG_referenced);
+		return PAGEREF_ACTIVATE;
+		
 		if (PageSwapBacked(page))
 			return PAGEREF_ACTIVATE;
 		/*
@@ -788,9 +791,9 @@ static enum page_references page_check_references(struct page *page,
 		 */
 		SetPageReferenced(page);
 		
-		if (PG_ref_now >= (1>>2) || referenced_ptes > 1)
-			return PAGEREF_ACTIVATE;
 
+		if (referenced_page || referenced_ptes > 1)
+			return PAGEREF_ACTIVATE;
 		/*
 		 * Activate file-backed executable pages after first usage.
 		 */
@@ -1785,10 +1788,10 @@ static void shrink_active_list(unsigned long nr_to_scan,
 			}
 		}
 
-		page -> PG_referenced = page -> PG_referenced >> 1;
-		if (page_referenced(page, 0, mz->mem_cgroup, &vm_flags)) {
+	page -> PG_referenced = page -> PG_referenced >> 1;
+	if (page_referenced(page, 0, mz->mem_cgroup, &vm_flags)) {
 			nr_rotated += hpage_nr_pages(page);
-			printk(KERN_INFO "%ld page referenced in active, PG_referenced = %ld.\n",page -> index ,page->PG_referenced);
+			
 			/*
 			 * Identify referenced, file-backed active pages and
 			 * give them one more trip around the active list. So
@@ -1799,6 +1802,7 @@ static void shrink_active_list(unsigned long nr_to_scan,
 			 * so we ignore them here.
 			 */
 			if ((vm_flags & VM_EXEC) && page_is_file_cache(page)) {
+			printk(KERN_INFO "%ld page referenced in active, PG_referenced = %ld.\n",page -> index ,page->PG_referenced);
 				list_add(&page->lru, &l_active);
 				continue;
 			}
